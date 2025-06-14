@@ -24,113 +24,247 @@ try:
 except ImportError:
     REQUESTS_AVAILABLE = False
 
-# ตั้งค่าหน้าเว็บ
+# PWA-Ready Configuration (ต้องเป็นคำสั่ง Streamlit แรกสุด)
 st.set_page_config(
     page_title="💰 Personal Financial App - Multi-User",
     page_icon="💰",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# CSS สำหรับ UI
+# PWA Features และ CSS
 st.markdown("""
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Financial App">
+
 <style>
-    .main-header {
-        background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
+/* PWA Mobile Optimization */
+@media (max-width: 768px) {
+    .main-header h1 { font-size: 1.3em; }
+    .main-header p { font-size: 0.9em; }
+    .stButton button { 
+        height: 48px; 
+        font-size: 16px; 
+        border-radius: 8px;
+        width: 100%;
+        margin: 5px 0;
+    }
+    .stMetric { 
+        background: #f8fafc; 
+        padding: 10px; 
+        border-radius: 8px; 
+        margin: 5px 0;
         text-align: center;
     }
-    
-    .streaming-live {
-        background: #ef4444;
-        color: white;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 0.8em;
-        animation: pulse 2s infinite;
-        display: inline-block;
-        margin-left: 10px;
-    }
-    
-    @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.5; }
-        100% { opacity: 1; }
-    }
-    
-    .portfolio-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .price-up {
-        color: #16a34a !important;
-        font-weight: bold;
-    }
-    
-    .price-down {
-        color: #dc2626 !important;
-        font-weight: bold;
-    }
-    
-    .price-neutral {
-        color: #6b7280 !important;
-    }
-    
-    .auth-container {
-        max-width: 500px;
-        margin: 0 auto;
-        padding: 30px 25px;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        border: 2px solid #e2e8f0;
-    }
-    
-    .register-highlight {
-        background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
-        border-left: 4px solid #38a169;
-    }
-    
-    .dca-calculator {
-        background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
-        border-radius: 15px;
-        padding: 20px;
-        margin: 20px 0;
-    }
-    
-    .stock-tracker-card {
-        background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
-        border-radius: 15px;
-        padding: 20px;
-        margin: 10px 0;
-        border-left: 5px solid #f59e0b;
-    }
-    
-    .averaging-down-card {
-        background: linear-gradient(135deg, #fef7f7 0%, #fed7d7 100%);
-        border-radius: 15px;
-        padding: 20px;
-        margin: 10px 0;
-        border-left: 5px solid #e53e3e;
-    }
-    
-    .user-info {
-        background: linear-gradient(135deg, #e6fffa 0%, #bee3f8 100%);
-        padding: 10px 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
+}
+
+/* Hide Streamlit elements for PWA */
+.stDeployButton { display: none; }
+header[data-testid="stHeader"] { display: none; }
+footer { display: none; }
+
+/* PWA Install Button */
+.pwa-install-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 25px;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: none;
+}
+
+.pwa-status {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #10b981;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    z-index: 1000;
+}
+
+/* CSS เดิมของคุณ */
+.main-header {
+    background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.streaming-live {
+    background: #ef4444;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    animation: pulse 2s infinite;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.portfolio-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.price-up {
+    color: #16a34a !important;
+    font-weight: bold;
+}
+
+.price-down {
+    color: #dc2626 !important;
+    font-weight: bold;
+}
+
+.price-neutral {
+    color: #6b7280 !important;
+}
+
+.auth-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 30px 25px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border: 2px solid #e2e8f0;
+}
+
+.register-highlight {
+    background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    border-left: 4px solid #38a169;
+}
+
+.dca-calculator {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.stock-tracker-card {
+    background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 10px 0;
+    border-left: 5px solid #f59e0b;
+}
+
+.averaging-down-card {
+    background: linear-gradient(135deg, #fef7f7 0%, #fed7d7 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 10px 0;
+    border-left: 5px solid #e53e3e;
+}
+
+.user-info {
+    background: linear-gradient(135deg, #e6fffa 0%, #bee3f8 100%);
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
 </style>
+
+<script>
+console.log('🚀 PWA Features Loading...');
+
+// PWA Service Worker
+if ('serviceWorker' in navigator) {
+    const swCode = `
+        const CACHE_NAME = 'financial-app-v1';
+        self.addEventListener('install', (event) => {
+            self.skipWaiting();
+        });
+        self.addEventListener('activate', (event) => {
+            self.clients.claim();
+        });
+        self.addEventListener('fetch', (event) => {
+            event.respondWith(fetch(event.request));
+        });
+    `;
+    
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    
+    navigator.serviceWorker.register(swUrl)
+        .then(() => console.log('✅ PWA Service Worker registered'))
+        .catch(() => console.log('❌ PWA Service Worker failed'));
+}
+
+// PWA Install Prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    const installBtn = document.createElement('button');
+    installBtn.className = 'pwa-install-btn';
+    installBtn.innerHTML = '📱 ติดตั้งแอป';
+    installBtn.style.display = 'block';
+    
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                installBtn.style.display = 'none';
+                showPWAInstalled();
+            }
+            deferredPrompt = null;
+        }
+    });
+    
+    document.body.appendChild(installBtn);
+});
+
+function showPWAInstalled() {
+    const statusDiv = document.createElement('div');
+    statusDiv.className = 'pwa-status';
+    statusDiv.innerHTML = '📱 PWA Mode';
+    document.body.appendChild(statusDiv);
+    setTimeout(() => statusDiv.style.display = 'none', 3000);
+}
+
+// PWA Detection
+if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('🎉 Running as PWA!');
+    document.addEventListener('DOMContentLoaded', () => {
+        showPWAInstalled();
+        document.body.style.overscrollBehavior = 'none';
+    });
+}
+
+console.log('✅ PWA Features loaded successfully');
+</script>
 """, unsafe_allow_html=True)
 
 # ฟังก์ชันสำหรับการเข้ารหัสรหัสผ่าน

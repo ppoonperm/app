@@ -1,0 +1,15 @@
+# Database
+financial_data.db
+*.db
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Backup
+*_backup.py
+*_original.py
